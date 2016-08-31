@@ -9,7 +9,7 @@ var board = new five.Board({
   io: new Tessel()
 });
 
-var leds = new five.Leds(["a5", "a6", "a7"]);
+var leds = new five.Leds(["a5", "a6", "a7", 'a3']);
 var button = new five.Button('a4');
 var statusLeds = [false, false, false];
 var isButtonPressed = false;
@@ -23,11 +23,12 @@ var server = http.createServer(function (request, response) {
   var urlParts = url.parse(request.url, true);
 
   // Create a regular expression to match requests to toggle LEDs
-  var ledRegex = /leds/;
+  var incomingRegex = /incoming/;
 
-  if (urlParts.pathname.match(ledRegex)) {
-    // If there is a request containing the string 'leds' call a function, toggleLED
-    toggleLED(urlParts.pathname, request, response);
+  if (urlParts.pathname.match(incomingRegex)) {
+    leds[3].toggle();
+    response.writeHead(200, {"Content-Type": "text/xml"});
+    response.end('<Response></Response>');
   } else {
     // All other request will call a function, showIndex
     showIndex(urlParts.pathname, request, response);
