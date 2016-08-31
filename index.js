@@ -1,6 +1,7 @@
 // These two dependencies remain the same
 var tessel = require('tessel');
 var http = require('http');
+var localtunnel = require('localtunnel');
 
 var Tessel = require("tessel-io");
 var five = require('johnny-five');
@@ -10,6 +11,7 @@ var board = new five.Board({
 
 var leds = new five.Leds(["a5", "a6", "a7"]);
 var statusLeds = [false, false, false];
+
 
 // Require two other core Node.js modules
 var fs = require('fs');
@@ -33,11 +35,22 @@ var server = http.createServer(function (request, response) {
 
 board.on('ready', () => {
   // Stays the same
-  server.listen(8080);
+  server.listen(8080, () => {
+    // Stays the same
+    console.log(require('os').networkInterfaces());
+    console.log('Server running at Port 8080');
+    var tunnel = localtunnel(8080, function(err, tunnel) {
+        if (err) {
+          console.error('Some err!')
+          console.error(err);
+        }
 
-  // Stays the same
-  console.log(require('os').networkInterfaces());
-  console.log('Server running at Port 8080');
+        // the assigned public url for your tunnel
+        // i.e. https://abcdefgjhij.localtunnel.me
+        console.log('Tunnel url:' + tunnel.url);
+    });
+  });
+
 });
 
 // Respond to the request with our index.html page

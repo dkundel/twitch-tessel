@@ -18,6 +18,7 @@
   "homepage": "https://github.com/dkundel/twitch-tessel#readme",
   "dependencies": {
     "johnny-five": "^0.10.0",
+    "localtunnel": "^1.8.1",
     "tessel-io": "^0.7.2"
   }
 }
