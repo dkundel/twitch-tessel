@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tessel Web App</title>
+</head>
+<body>
+  <h1>Hello from Tessel!</h1>
+  <p>Press a button to toggle an LED.</p>
+  <ul>
+    <li>
+      <button class="led-button" data-led="0">Green</button>
+      Status: <span class="led-status"></span>
+    </li>
+    <li>
+      <button class="led-button" data-led="1">Red 1</button>
+      Status: <span class="led-status"></span>
+    </li>
+    <li>
+      <button class="led-button" data-led="2">Red 2</button>
+      Status: <span class="led-status"></span>
+    </li>
+  </ul>
+  <script type="text/javascript">
+    // Get a NodeList of elements with the class 'led-button'
+    var buttons = document.querySelectorAll('.led-button');
+
+    // Iterate through that Nodelist and add a 'click' EventListener
+    Array.prototype.forEach.call(buttons, function (button) {
+      button.addEventListener('click', toggleLed);
+    });
+
+    // Our event handler function for 'click' event on the LED buttons
+    function toggleLed (event) {
+      var button = event.target;
+      var ledIndex = button.getAttribute('data-led'); // The index of the led in the Tessel.led array
+      var statusNode = button.parentNode.querySelector('.led-status'); // The sibling status <span> to update
+
+      // Create a new XHR for communicating requests to our Tessel server
+      var req = new XMLHttpRequest();
+
+      // Open a GET request to '/leds/:index'
+      req.open('GET', '/leds/' + ledIndex);
+
+      // Once the request gets a successful response, update that statusNode with the status of the LED.
+      req.onload = function(e) {
+        if (req.readyState == 4 && req.status == 200) {
+          var response = JSON.parse(req.responseText);
+          statusNode.textContent = response.on ? 'ON' : 'OFF';
+        } else {
+          console.log('Error', e); // If something went wrong, log that event to the console.
+        }
+      }
+      req.send(); // Send our request to the server
+    }
+  </script>
+</body>
+</html>
