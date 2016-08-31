@@ -7,23 +7,37 @@
 <body>
   <h1>Hello from Tessel!</h1>
   <p>Press a button to toggle an LED.</p>
+  <p>The button on the board is <span id="buttonStatus"></span></p>
   <ul>
     <li>
       <button class="led-button" data-led="0">Green</button>
-      Status: <span class="led-status"></span>
+      Status: <span class="led-status status-0"></span>
     </li>
     <li>
       <button class="led-button" data-led="1">Red 1</button>
-      Status: <span class="led-status"></span>
+      Status: <span class="led-status status-1"></span>
     </li>
     <li>
       <button class="led-button" data-led="2">Red 2</button>
-      Status: <span class="led-status"></span>
+      Status: <span class="led-status status-2"></span>
     </li>
   </ul>
+  <script src="/socket.io/socket.io.js"></script>
   <script type="text/javascript">
     // Get a NodeList of elements with the class 'led-button'
     var buttons = document.querySelectorAll('.led-button');
+
+    var socket = io();
+
+    socket.on('button', function (isPressed) {
+      document.getElementById('buttonStatus').innerHTML = isPressed ? 'pressed' : 'not pressed';
+    });
+
+    socket.on('led-status', function (ledStats) {
+      ledStats.forEach(function (ledIsOn, idx) {
+        document.querySelector('.led-status.status-'+idx).innerHTML = ledIsOn ? 'On' : 'Off';
+      });
+    });
 
     // Iterate through that Nodelist and add a 'click' EventListener
     Array.prototype.forEach.call(buttons, function (button) {
@@ -33,25 +47,10 @@
     // Our event handler function for 'click' event on the LED buttons
     function toggleLed (event) {
       var button = event.target;
-      var ledIndex = button.getAttribute('data-led'); // The index of the led in the Tessel.led array
+      var ledIndex = parseInt(button.getAttribute('data-led'), 10); // The index of the led in the Tessel.led array
       var statusNode = button.parentNode.querySelector('.led-status'); // The sibling status <span> to update
 
-      // Create a new XHR for communicating requests to our Tessel server
-      var req = new XMLHttpRequest();
-
-      // Open a GET request to '/leds/:index'
-      req.open('GET', '/leds/' + ledIndex);
-
-      // Once the request gets a successful response, update that statusNode with the status of the LED.
-      req.onload = function(e) {
-        if (req.readyState == 4 && req.status == 200) {
-          var response = JSON.parse(req.responseText);
-          statusNode.textContent = response.on ? 'ON' : 'OFF';
-        } else {
-          console.log('Error', e); // If something went wrong, log that event to the console.
-        }
-      }
-      req.send(); // Send our request to the server
+      socket.emit('toggle-led', ledIndex);
     }
   </script>
 </body>

@@ -10,8 +10,9 @@ var board = new five.Board({
 });
 
 var leds = new five.Leds(["a5", "a6", "a7"]);
+var button = new five.Button('a4');
 var statusLeds = [false, false, false];
-
+var isButtonPressed = false;
 
 // Require two other core Node.js modules
 var fs = require('fs');
@@ -33,7 +34,27 @@ var server = http.createServer(function (request, response) {
   }
 });
 
+var io = require('socket.io')(server);
+
+io.on('connection', function(socket){
+  console.log('a user connected');
+  socket.emit('button', isButtonPressed);
+  socket.on('toggle-led', toggleLED);
+});
+
 board.on('ready', () => {
+
+  button.on("press", () => {
+    console.log("Button Pressed!");
+    isButtonPressed = true;
+    io.emit('button', isButtonPressed);
+  });
+  button.on("release", () => {
+    console.log("Button Released!");
+    isButtonPressed = false;
+    io.emit('button', isButtonPressed);
+  });
+
   // Stays the same
   server.listen(8080, () => {
     // Stays the same
@@ -71,23 +92,11 @@ function showIndex (url, request, response) {
 }
 
 // Toggle the led specified in the url and respond with its state
-function toggleLED (url, request, response) {
-  // Create a regular expression to find the number at the end of the url
-  var indexRegex = /(\d)$/;
-
-  // Capture the number, returns an array
-  var result = indexRegex.exec(url);
-
-  // Grab the captured result from the array
-  var index = result[1];
-
-  // Use the index to refence the correct LED
+function toggleLED (index) {
   var led = leds[index];
 
   // Toggle the state of the led and call the callback after that's done
   led.toggle();
   statusLeds[index] = !statusLeds[index];
-  // The led was successfully toggled, respond with the state of the toggled led using led.isOn
-  response.writeHead(200, {"Content-Type": "application/json"});
-  response.end(JSON.stringify({on: statusLeds[index]}));
+  io.emit('led-status', statusLeds);
 }
