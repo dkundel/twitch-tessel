@@ -1,5 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.10.1
+version: v1.13.3
 ignore: {}
 # patches apply the minimum changes required to fix a vulnerability
 patch:
@@ -11,3 +11,6 @@ patch:
   'npm:ms:20170412':
     - socket.io > socket.io-adapter > socket.io-parser > debug > ms:
         patched: '2018-01-18T16:03:02.963Z'
+  SNYK-JS-AXIOS-174505:
+    - localtunnel > axios:
+        patched: '2019-05-07T07:03:23.728Z'
