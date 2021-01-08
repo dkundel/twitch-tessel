@@ -21,7 +21,7 @@
   "dependencies": {
     "johnny-five": "^0.10.0",
     "localtunnel": "^1.8.1",
-    "socket.io": "2.0.2",
+    "socket.io": "2.4.0",
     "tessel-io": "^0.7.2",
     "snyk": "^1.69.0"
   },
